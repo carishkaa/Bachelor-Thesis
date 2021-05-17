@@ -15,11 +15,11 @@ def get_empty_auc_dataset(STA_range, n_repeats):
     data = dict()
 
     transcripts = [10, 100, 1000, 10000]
-    class_effect_n_transcripts = [0, 2, 5, 10]
+    class_effect_n_transcripts = [0, 2, 5, 10, 20]
     class_effect = [0.2, 0.3, 0.4]  # mean of normal distribution
 
-    IS_effect_n_transcripts = [2, 5, 10]
-    IS_effect = [0.5, 0.9]  # coefficients beta1..beta3
+    IS_effect_n_transcripts = [2, 5, 10, 20]
+    IS_effect = [0.3, 0.5, 0.9]  # coefficients beta1..beta3
 
     for t in transcripts:
         data[t] = dict()

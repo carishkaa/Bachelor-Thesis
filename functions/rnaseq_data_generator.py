@@ -4,6 +4,7 @@
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
+import random
 
 
 def rna_seq_generator(
@@ -32,14 +33,16 @@ def rna_seq_generator(
     """
 
     # coefficients, IS role
-    beta0 = np.log(stats.f.rvs(125.75, 2.99, 1.09, 7.18, size=n_transcripts))
+    # beta0 = np.log(stats.f.rvs(125.75, 2.99, 1.09, 7.18, size=n_transcripts))
+    beta0 = np.log(stats.f.rvs(38141.58, 3.02, -0.22, 5.99, size=n_transcripts))
     # beta0 = np.random.normal(3, 1.2, n_transcripts)
     beta1 = get_random_beta(n_transcripts, n_IS_effect, IS_effect)
     beta2 = get_random_beta(n_transcripts, n_IS_effect, IS_effect)
     beta3 = get_random_beta(n_transcripts, n_IS_effect, IS_effect)
 
     # 1) Generate RNASeq for one class (the equivalent of STA class)
-    counts_STA, expected_counts_STA, IS_STA = generate_rnaseq_class("STA", n_STA, n_transcripts, beta0, beta1, beta2, beta3,
+    counts_STA, expected_counts_STA, IS_STA = generate_rnaseq_class("STA", n_STA, n_transcripts, beta0, beta1, beta2,
+                                                                    beta3,
                                                                     distribution=distribution,
                                                                     isClassEffect=False, n_effect=0,
                                                                     class_effect=class_effect,
@@ -72,7 +75,7 @@ def rna_seq_generator(
         RNASeq.to_csv('data/rnaseq_origin_{name}.csv'.format(name=result_file_name))
         expectedRNASeq.to_csv('data/rnaseq_expected_{name}.csv'.format(name=result_file_name))
         IS.to_csv('data/immunosuppression_{name}.csv'.format(name=result_file_name))
-    return RNASeq, expectedRNASeq, IS
+    return RNASeq, expectedRNASeq, IS, (counts_STA, counts_CR, counts_OT), (expected_counts_STA, expected_counts_CR, expected_counts_OT), (IS_STA, IS_CR, IS_OT)
 
 
 def get_random_beta(n_transcripts, n_IS_effect, IS_effect):
@@ -90,10 +93,11 @@ def generate_rnaseq_class(name, n_samples, n_transcripts, beta0, beta1, beta2, b
             IS[:, i] = np.random.choice([0, 1], p=[0.4, 0.6], size=n_samples, replace=True)
 
     # effect of class
-    if isClassEffect:   # TODO try other distributions
+    if isClassEffect:
         eff = np.random.permutation(np.append(np.zeros(n_transcripts - n_effect),
                                               np.random.normal(class_effect[0], class_effect[1], n_effect)))
-        beta0 += eff
+        beta0 = beta0 - eff if random.random() > 0.5 else beta0 + eff
+        beta0[beta0 < 0] += 2 * eff[beta0 < 0]
 
     # generate counts with and without IS
     counts = np.zeros((n_transcripts, n_samples), dtype=int)
@@ -133,7 +137,7 @@ def generate_rnaseq_class(name, n_samples, n_transcripts, beta0, beta1, beta2, b
 
 
 def estimate_nb_parameters(mean):
-    std = np.sqrt(0.08847 * mean ** 2 + 0.9925 * mean + 0.1767)
+    std = np.sqrt(0.04519 * mean ** 2 + 1.17 * mean + 0.1613)
     p = mean / std ** 2
     n = mean * p / (1.0 - p)
     return n, p

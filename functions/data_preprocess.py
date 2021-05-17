@@ -31,7 +31,6 @@ def compensation(counts, IS, t, n_CR, distribution):
         if distribution == "Poisson":
             mp = sm.formula.glm("y ~ x1 + x2 + x3", family=sm.families.Poisson(), data=df).fit()
         elif distribution == "Negative binomial":
-            # STA_counts = STA_counts[(STA_counts.cases !=0) | (STA_counts.notcases!=0)]
             mp = sm.formula.glm("y ~ x1 + x2 + x3", family=sm.families.NegativeBinomial(), data=df).fit()
         else:
             print("Unknown distribution")
@@ -39,18 +38,11 @@ def compensation(counts, IS, t, n_CR, distribution):
         learned_beta[:, ind] = np.array([mp.params.x1, mp.params.x2, mp.params.x3])
 
     # leave only CR and OT classes for classification
-    drop_list = []
-    for patient in counts.columns:
-        if patient[:2] != 'OT' and patient[:2] != 'CR':
-            drop_list.append(patient)
-
-    OT_CR_counts = counts.drop(drop_list, axis=1).to_numpy(dtype=float)
-    OT_CR_IS = IS.drop(drop_list, axis=0).values
+    OT_CR_counts = counts.loc[:, ~STA_patients].to_numpy(dtype=float)
+    OT_CR_IS = IS.loc[~STA_patients].values
 
     # filter out IS from CR
-    for ind in range(t):
-        OT_CR_counts[ind, :n_CR] = OT_CR_counts[ind, :n_CR] / np.exp(np.dot(OT_CR_IS[:n_CR], learned_beta[:, ind]))
-
+    OT_CR_counts[:, :n_CR] = OT_CR_counts[:, :n_CR] / np.exp(np.dot(OT_CR_IS[:n_CR], learned_beta).transpose())
     OT_CR_counts = OT_CR_counts.transpose()
     return OT_CR_counts, OT_CR_IS, learned_beta
 
