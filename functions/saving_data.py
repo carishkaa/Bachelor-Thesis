@@ -14,7 +14,7 @@ def get_empty_auc_dataset(STA_range, n_repeats):
     """
     data = dict()
 
-    transcripts = [10, 100, 1000, 10000]
+    transcripts = [20]# TODO [10, 100, 1000, 10000]
     class_effect_n_transcripts = [0, 2, 5, 10, 20]
     class_effect = [0.2, 0.3, 0.4]  # mean of normal distribution
 

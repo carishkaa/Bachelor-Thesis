@@ -82,18 +82,18 @@ def experiment(generated_counts, generated_expected_counts, generated_IS, n_CR: 
     X = pd.DataFrame(data=counts, columns=columns)
     y = pd.DataFrame(data=y)
     y.head()
-    results1 = classify(X, y, n_splits=12, n_repeats=1)
+    results1 = classify(X, y, n_splits=5, n_repeats=1)
 
     # EXPECTED
     X = pd.DataFrame(data=expected_counts, columns=columns)
     y = pd.DataFrame(data=y)
     y.head()
-    results2 = classify(X, y, n_splits=12, n_repeats=1)
+    results2 = classify(X, y, n_splits=5, n_repeats=1)
 
     # FILTERED
     X = pd.DataFrame(data=filtered_counts, columns=columns)
     y = pd.DataFrame(data=y)
     y.head()
-    results3 = classify(X, y, n_splits=12, n_repeats=1)
+    results3 = classify(X, y, n_splits=5, n_repeats=1)
 
     return results1, results2, results3

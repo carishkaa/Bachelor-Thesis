@@ -1,18 +1,27 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
 import random
 
+from utils.enums import Distribution
+
+
+@dataclass
+class NormalDistributionParameters:
+    mean: float
+    std: float
+
 
 def rna_seq_generator(
         n_transcripts: int,
-        distribution: str,
+        distribution: Distribution,
         n_STA: int, n_CR: int, n_OT: int,
         n_IS_effect: int, IS_effect: tuple,
-        is_class_effect: bool, n_class_effect: int, class_effect: tuple,
+        is_class_effect: bool, n_class_effect: int, class_effect: NormalDistributionParameters,
         result_file_name: str = ""
 ):
     """
@@ -33,7 +42,6 @@ def rna_seq_generator(
     """
 
     # coefficients, IS role
-    # beta0 = np.log(stats.f.rvs(125.75, 2.99, 1.09, 7.18, size=n_transcripts))
     beta0 = np.log(stats.f.rvs(38141.58, 3.02, -0.22, 5.99, size=n_transcripts))
     # beta0 = np.random.normal(3, 1.2, n_transcripts)
     beta1 = get_random_beta(n_transcripts, n_IS_effect, IS_effect)
@@ -78,14 +86,26 @@ def rna_seq_generator(
     return RNASeq, expectedRNASeq, IS, (counts_STA, counts_CR, counts_OT), (expected_counts_STA, expected_counts_CR, expected_counts_OT), (IS_STA, IS_CR, IS_OT)
 
 
-def get_random_beta(n_transcripts, n_IS_effect, IS_effect):
+def get_random_beta(
+        n_transcripts: int,
+        n_IS_effect: int,
+        IS_effect
+) -> 'np.ndarray[float]':
     beta = np.append(np.zeros(n_transcripts - n_IS_effect), np.linspace(IS_effect[0], IS_effect[1], n_IS_effect))
     np.random.shuffle(beta)
     return beta
 
 
-def generate_rnaseq_class(name, n_samples, n_transcripts, beta0, beta1, beta2, beta3, class_effect, isClassEffect,
-                          n_effect, isIS, distribution):
+def generate_rnaseq_class(
+        name: str,
+        n_samples: int, n_transcripts: int,
+        beta0, beta1, beta2, beta3,
+        class_effect: NormalDistributionParameters,
+        isClassEffect: bool,
+        n_effect: int,
+        isIS: bool,
+        distribution: Distribution
+):
     # init immunosuppression
     IS = np.zeros((n_samples, 3))
     if isIS:
@@ -95,7 +115,7 @@ def generate_rnaseq_class(name, n_samples, n_transcripts, beta0, beta1, beta2, b
     # effect of class
     if isClassEffect:
         eff = np.random.permutation(np.append(np.zeros(n_transcripts - n_effect),
-                                              np.random.normal(class_effect[0], class_effect[1], n_effect)))
+                                              np.random.normal(class_effect.mean, class_effect.std, n_effect)))
         beta0 = beta0 - eff if random.random() > 0.5 else beta0 + eff
         beta0[beta0 < 0] += 2 * eff[beta0 < 0]
 
@@ -106,11 +126,11 @@ def generate_rnaseq_class(name, n_samples, n_transcripts, beta0, beta1, beta2, b
         mu = np.exp(beta0[i] + beta1[i] * IS[:, 0] + beta2[i] * IS[:, 1] + beta3[i] * IS[:, 2])
         mu_without_IS = np.exp(beta0[i] * np.ones((n_samples,)))
         # Poisson
-        if distribution == "Poisson":
+        if distribution == Distribution.POISSON:
             counts[i, :] = np.random.poisson(lam=mu[:n_samples], size=n_samples)
             counts_without_IS[i, :] = np.random.poisson(lam=mu_without_IS[:n_samples], size=n_samples)
         # Negative binomial
-        elif distribution == "Negative binomial":
+        elif distribution == Distribution.NEGATIVE_BINOMIAL:
             n, p = estimate_nb_parameters(mu[:n_samples])
             counts[i, :] = np.random.negative_binomial(n=n, p=p, size=n_samples)
             n, p = estimate_nb_parameters(mu_without_IS[:n_samples])
@@ -136,7 +156,7 @@ def generate_rnaseq_class(name, n_samples, n_transcripts, beta0, beta1, beta2, b
     return counts_df, counts_without_IS_df, IS_df
 
 
-def estimate_nb_parameters(mean):
+def estimate_nb_parameters(mean: float) -> tuple:
     std = np.sqrt(0.04519 * mean ** 2 + 1.17 * mean + 0.1613)
     p = mean / std ** 2
     n = mean * p / (1.0 - p)

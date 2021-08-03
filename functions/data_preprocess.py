@@ -22,6 +22,7 @@ def compensation(counts, IS, t, n_CR, distribution):
     STA_IS = IS.loc[STA_patients]
 
     # try to learn the beta1 parameters from STA class
+    # TODO: save learned_beta and use it to speed up code
     learned_beta = np.zeros((3, t))
     for ind in range(t):
         df = pd.DataFrame({"x1": STA_IS['IS1'].values.tolist(),
