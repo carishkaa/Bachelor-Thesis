@@ -4,12 +4,10 @@
 import numpy as np
 
 
-def get_empty_auc_dataset(STA_range, n_repeats):
+def get_empty_auc_dataset():
     """
     data[number_of_transcripts][IS_number_of_effected_transcripts][IS_effect][n_class][c]
 
-    :param STA_range:
-    :param n_repeats:
     :return:
     """
     data = dict()

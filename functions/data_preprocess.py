@@ -54,8 +54,7 @@ def preprocess_for_classification(samples):
     samples = samples.loc[:, ~STA_counts]
 
     # recode patient status to numeric (OT = 0, CR = 1)
-    patients = samples.columns
-    patients_labels = pd.DataFrame({'status': [p[:2] for p in patients]})
+    patients_labels = pd.DataFrame({'status': [p[:2] for p in samples.columns]})
 
     patients_labels = patients_labels.replace({'OT': 0, 'CR': 1})
     labels = ['OT', 'CR']
