@@ -2,8 +2,7 @@
 *.zip
 .DS_Store
 *.npz
-!notebooks/auc_results_expected_neg-binomial.npz
-!notebooks/auc_results_filtered_neg-binomial.npz
-!notebooks/auc_results_origin_neg-binomial.npz
+!notebooks/auc_results_*_neg-binomial.npz
+!notebooks/auc_results_*_poisson.npz
 __pycache__/
 notebooks/generated*
