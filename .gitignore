@@ -1,4 +1,16 @@
 .idea
 .DS_Store
-**/*.npz
+
 __pycache__/
+*/.ipynb_checkpoints/*
+
+*.zip
+*.npz
+
+!notebooks/auc_results_*_neg-binomial.npz
+!notebooks/auc_results_*_poisson.npz
+!functions/auc_results_*_neg-binomial.npz
+!functions/auc_results_*_poisson.npz
+
+notebooks/generated*
+
