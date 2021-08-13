@@ -203,7 +203,7 @@ if __name__ == "__main__":
     if os.path.isfile(filename_auc_results_origin) or \
             os.path.isfile(filename_auc_results_expected) or \
             os.path.isfile(filename_auc_results_filtered):
-        print('WARNING: File with this name already exists!')
+        print('WARNING: File with this name already exists! But it\'s ok')
     else:
         np.savez(filename_auc_results_origin, auc_data=data)
         np.savez(filename_auc_results_expected, auc_data=data)
@@ -220,12 +220,12 @@ if __name__ == "__main__":
     saved_filtered = saved_filtered['auc_data'].item()
 
     # EXPERIMENTS
-    transcripts = [10000]
-    class_effect_n_transcripts = [0, 5, 10, 20]
-    class_effect = [0.3, 0.4]  # mean of normal distribution
+    transcripts = [1000]
+    class_effect_n_transcripts = [0, 2, 5, 10]
+    class_effect = [0.2, 0.3, 0.4]  # mean of normal distribution
 
-    IS_effect_n_transcripts = [5, 10]
-    IS_effect = [0.5, 0.9]  # coefficients beta1..beta3
+    IS_effect_n_transcripts = [10]
+    IS_effect = [0.3, 0.5, 0.9]  # coefficients beta1..beta3
 
     STA_range = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000]
 
